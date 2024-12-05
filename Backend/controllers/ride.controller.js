@@ -1,6 +1,5 @@
 const rideService = require('../services/ride.service');
 const { validationResult } = require('express-validator');
- // Import the socket instance
 
 module.exports.createRide = async (req, res) => {
     // Validate incoming request
@@ -22,34 +21,17 @@ module.exports.createRide = async (req, res) => {
             user: req.user._id, pickup, destination, vehicleType 
         });
 
-        // Send socket notification to the user
-        io.to(userId).emit('notification', {
-            message: 'Ride created successfully!',
-            rideId: ride._id,
-        });
-
         // Use static data to simulate nearby captains
-        const captainsInRadius = [
-            { socketId: 'captain1SocketId' }, 
-            { socketId: 'captain2SocketId' }
-        ];
+       
 
-        // Notify all captains within radius about the new ride
-        captainsInRadius.forEach((captain) => {
-            io.to(captain.socketId).emit('new-ride', {
-                event: 'new-ride',
-                data: {
-                    rideId: ride._id,
-                    pickup,
-                    destination,
-                    vehicleType,
-                    user: req.user,
-                },
-            });
+        // No socket communication here, just return the response
+        // Respond with success message
+        res.status(201).json({
+            message: 'Ride created successfully!',
+            ride,
+            captainsInRadius, // Simulate captains data
         });
 
-        // Respond with success message
-        res.status(201).json({ message: 'Ride created successfully!', ride });
     } catch (error) {
         console.error('Error creating ride:', error);
         res.status(500).json({ error: 'Internal Server Error', details: error.message });
